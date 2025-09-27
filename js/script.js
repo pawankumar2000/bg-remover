@@ -22,7 +22,7 @@ document.getElementById('file').addEventListener('change', async function (event
   formData.append('image_file', file); // Append the file to the form data
   formData.append('size', 'auto'); // Specify the size parameter
 
-  const apiKey = import.meta.env.BG_REMOVER_API; // Replace with your API key
+  const apiKey = config.BG_REMOVER_API; // Replace with your API key
 
   try {
     const response = await fetch('https://api.remove.bg/v1.0/removebg', { // Send request to Remove.bg API
