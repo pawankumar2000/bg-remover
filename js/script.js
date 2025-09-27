@@ -1,5 +1,20 @@
 // Variable to store the processed image URL
 let imageURL;
+// Note: `require` and `process.env` are Node.js features and not available in the browser.
+// Read the API key from a meta tag, a global window variable, or prompt the user.
+
+function getApiKey() {
+  // 1) Try meta tag: <meta name="bg-remover-api-key" content="...">
+  const meta = document.querySelector('meta[name="bg-remover-api-key"]');
+  if (meta && meta.content && meta.content.trim() !== '') return meta.content.trim();
+
+  // 2) Try window global set by another script (optional)
+  if (window.BG_REMOVER_API && window.BG_REMOVER_API.trim() !== '') return window.BG_REMOVER_API.trim();
+
+  // 3) Ask the user at runtime (useful for local dev). Do NOT use this for production.
+  const key = prompt('Enter your remove.bg API key (for this session only):');
+  return key ? key.trim() : '';
+}
 
 /* File Upload Event Listener Section Start */
 document.getElementById('file').addEventListener('change', async function (event) {
@@ -22,7 +37,17 @@ document.getElementById('file').addEventListener('change', async function (event
   formData.append('image_file', file); // Append the file to the form data
   formData.append('size', 'auto'); // Specify the size parameter
 
-  const apiKey = config.BG_REMOVER_API; // Replace with your API key
+  const apiKey = getApiKey();
+
+  if (!apiKey) {
+    alert('API key is missing. Please add your API key to a meta tag in index.html or enter it when prompted.');
+    // Reset UI
+    document.querySelector('.spinner').style.display = 'none';
+    document.querySelector('.input-div').style.display = 'flex';
+    document.querySelector('.p').style.display = 'block';
+    fileInput.value = '';
+    return;
+  }
 
   try {
     const response = await fetch('https://api.remove.bg/v1.0/removebg', { // Send request to Remove.bg API
